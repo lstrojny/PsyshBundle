@@ -11,6 +11,7 @@
 
 namespace Fidry\PsyshBundle;
 
+use Closure;
 use Psy\Shell;
 use RuntimeException;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -23,10 +24,15 @@ use function array_merge;
 final class PsyshFacade
 {
     private static Shell $shell;
+    private static Closure $shellInitializer;
 
     public static function init(): void
     {
-        // noop ... keeping the method as is for backward compatibility
+        if (isset(self::$shell)) {
+            return;
+        }
+
+        self::$shell = (self::$shellInitializer)();
     }
 
     public static function debug(array $variables = [], $bind = null): void
@@ -40,8 +46,8 @@ final class PsyshFacade
         self::$shell::debug($_variables, $bind);
     }
 
-    public function setShell(Shell $shell): void
+    public function setShellInitializer(Closure $shellInitializer): void
     {
-        self::$shell = $shell;
+        self::$shellInitializer = $shellInitializer;
     }
 }
